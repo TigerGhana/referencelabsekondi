@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CEU Equipment Inventory — Public Health Reference Laboratory, Sekondi</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+
+  :root{
+    --ink:#0E2A2E; --paper:#F3F6F5; --panel:#FFFFFF;
+    --teal:#0F6E6E; --teal-deep:#0B4A4A; --teal-soft:#E4F0EF;
+    --ok:#1E9E64; --ok-soft:#E4F5EC;
+    --warn:#C9861A; --warn-soft:#FBF0DD;
+    --bad:#D14343; --bad-soft:#FBE7E7;
+    --line:#DCE4E2; --muted:#5B6B69; --muted-2:#8B9997;
+    --radius:10px;
+    --font-body:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    --font-mono:'DM Mono', ui-monospace, 'SF Mono', 'Consolas', monospace;
+    --shadow-sm: 0 1px 2px rgba(14,42,46,0.06);
+    --shadow-md: 0 6px 20px rgba(14,42,46,0.08);
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{ background:var(--paper); color:var(--ink); font-family:var(--font-body); -webkit-font-smoothing:antialiased; line-height:1.4; }
+  a{ color:inherit; }
+  button{ font-family:inherit; }
+  :focus-visible{ outline:2px solid var(--teal); outline-offset:2px; }
+  .wrap{ max-width:1280px; margin:0 auto; padding:0 24px 64px; }
+
+  .hero{ position:relative; background:linear-gradient(180deg, var(--teal-deep) 0%, var(--teal) 100%); color:#EAF6F4; overflow:hidden; border-bottom:4px solid var(--ink); }
+  .hero::before{ content:""; position:absolute; inset:0; background-image:linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px); background-size:28px 28px; mask-image:radial-gradient(ellipse at top left, black 10%, transparent 70%); pointer-events:none; }
+  .hero-inner{ position:relative; max-width:1280px; margin:0 auto; padding:28px 24px 0; }
+  .eyebrow{ font-family:var(--font-mono); font-size:11.5px; letter-spacing:.14em; text-transform:uppercase; color:#B9E6DE; display:flex; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+  .eyebrow .dot{ width:6px; height:6px; border-radius:50%; background:#7CE0BE; box-shadow:0 0 0 3px rgba(124,224,190,0.25); }
+  .hero-title-row{ display:flex; justify-content:space-between; align-items:flex-end; gap:24px; flex-wrap:wrap; padding-bottom:22px; }
+  .hero h1{ margin:0; font-size:clamp(26px, 3.4vw, 38px); font-weight:800; letter-spacing:-0.01em; }
+  .hero p.sub{ margin:8px 0 0; color:#CBEAE3; font-size:14.5px; max-width:56ch; }
+  .hero-right{ display:flex; flex-direction:column; align-items:flex-end; gap:10px; }
+  .hero-clock{ text-align:right; font-family:var(--font-mono); }
+  .hero-clock .time{ font-size:22px; font-weight:500; color:#fff; }
+  .hero-clock .date{ font-size:12px; color:#B9E6DE; letter-spacing:.04em; }
+
+  .conn-pill{ display:inline-flex; align-items:center; gap:6px; font-family:var(--font-mono); font-size:11px; letter-spacing:.05em; text-transform:uppercase; padding:4px 10px; border-radius:20px; background:rgba(255,255,255,0.1); color:#EAF6F4; }
+  .conn-dot{ width:7px; height:7px; border-radius:50%; }
+  .conn-dot.live{ background:#38E0A0; box-shadow:0 0 6px 1px rgba(56,224,160,0.7); }
+  .conn-dot.connecting{ background:#FFC966; box-shadow:0 0 6px 1px rgba(255,201,102,0.7); }
+  .conn-dot.offline{ background:#FF7A7A; box-shadow:0 0 6px 1px rgba(255,122,122,0.7); }
+
+  .admin-area{ display:flex; align-items:center; gap:8px; }
+  .btn-admin{ display:inline-flex; align-items:center; gap:6px; padding:7px 13px; border-radius:8px; border:1px solid rgba(255,255,255,0.35); background:rgba(255,255,255,0.08); color:#EAF6F4; font-size:12.5px; cursor:pointer; font-family:var(--font-body); }
+  .btn-admin:hover{ background:rgba(255,255,255,0.18); }
+  .admin-badge{ display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:20px; background:rgba(56,224,160,0.15); border:1px solid rgba(56,224,160,0.4); color:#B9F5DC; font-size:12px; font-family:var(--font-mono); }
+
+  .vitals{ position:relative; display:grid; grid-template-columns:repeat(4,1fr); background:rgba(6,34,34,0.35); border-top:1px solid rgba(255,255,255,0.14); }
+  .vital{ padding:18px 22px; border-right:1px solid rgba(255,255,255,0.12); display:flex; flex-direction:column; gap:6px; }
+  .vital:last-child{ border-right:none; }
+  .vital-label{ font-family:var(--font-mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:#B9E6DE; display:flex; align-items:center; gap:7px; }
+  .led{ width:8px; height:8px; border-radius:50%; display:inline-block; flex-shrink:0; }
+  .led.ok{ background:#38E0A0; box-shadow:0 0 8px 1px rgba(56,224,160,0.7); }
+  .led.bad{ background:#FF7A7A; box-shadow:0 0 8px 1px rgba(255,122,122,0.7); }
+  .led.warn{ background:#FFC966; box-shadow:0 0 8px 1px rgba(255,201,102,0.7); }
+  .led.neutral{ background:#BFE8E0; box-shadow:0 0 6px 1px rgba(191,232,224,0.5); }
+  .vital-value{ font-family:var(--font-mono); font-size:30px; font-weight:500; color:#fff; line-height:1; }
+  .vital-value small{ font-size:13px; color:#CBEAE3; font-weight:400; margin-left:4px; }
+
+  .banner{ display:none; align-items:center; justify-content:space-between; gap:12px; padding:12px 16px; border-radius:8px; font-size:13.5px; margin:18px 0; }
+  .banner.show{ display:flex; }
+  .banner.error{ background:var(--bad-soft); color:#9A2E2E; border:1px solid rgba(209,67,67,0.3); }
+  .banner.info{ background:var(--teal-soft); color:var(--teal-deep); border:1px solid rgba(15,110,110,0.25); }
+  .banner button{ background:none; border:none; font-size:16px; cursor:pointer; color:inherit; opacity:0.7; }
+  .banner button:hover{ opacity:1; }
+
+  .section{ margin-top:36px; }
+  .section-head{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:14px; gap:12px; flex-wrap:wrap; }
+  .section-head h2{ font-size:15px; text-transform:uppercase; letter-spacing:.08em; margin:0; color:var(--ink); font-weight:700; }
+  .section-head .hint{ font-size:12.5px; color:var(--muted-2); font-family:var(--font-mono); }
+
+  .panel-grid{ display:grid; grid-template-columns:1.1fr 1fr 1fr 1fr; gap:16px; }
+  .panel{ background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:18px 18px 16px; box-shadow:var(--shadow-sm); }
+  .panel h3{ margin:0 0 14px; font-size:12.5px; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); font-weight:700; }
+
+  .donut-wrap{ display:flex; align-items:center; gap:16px; }
+  .donut-legend{ display:flex; flex-direction:column; gap:9px; font-size:13px; flex:1;}
+  .donut-legend .row{ display:flex; align-items:center; justify-content:space-between; gap:8px;}
+  .donut-legend .k{ display:flex; align-items:center; gap:8px; color:var(--ink); }
+  .donut-legend .sw{ width:10px; height:10px; border-radius:3px; flex-shrink:0;}
+  .donut-legend .v{ font-family:var(--font-mono); font-weight:500; color:var(--muted); }
+
+  .barlist{ display:flex; flex-direction:column; gap:10px; }
+  .barlist .item{ display:grid; grid-template-columns: 96px 1fr 30px; align-items:center; gap:10px; }
+  .barlist .name{ font-size:12.5px; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .barlist .track{ height:8px; background:var(--teal-soft); border-radius:5px; overflow:hidden; }
+  .barlist .fill{ height:100%; background:var(--teal); border-radius:5px; }
+  .barlist .count{ font-family:var(--font-mono); font-size:12px; color:var(--muted); text-align:right; }
+  .calbar .fill.ok{ background:var(--ok); }
+  .calbar .fill.bad{ background:var(--bad); }
+  .calbar .fill.warn{ background:var(--warn); }
+  .calbar .fill.neutral{ background:var(--muted-2); }
+
+  .attention{ background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--bad); border-radius:var(--radius); box-shadow:var(--shadow-sm); }
+  .attention .attention-head{ display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid var(--line); cursor:pointer; }
+  .attention .attention-head h3{ margin:0; font-size:13.5px; font-weight:700; color:var(--ink); display:flex; align-items:center; gap:8px; }
+  .attention .count-badge{ background:var(--bad-soft); color:var(--bad); font-family:var(--font-mono); font-size:12px; padding:2px 9px; border-radius:20px; font-weight:500; }
+  .attention .toggle-icon{ color:var(--muted-2); font-size:13px; transition:transform .2s ease; }
+  .attention.collapsed .toggle-icon{ transform:rotate(-90deg); }
+  .attention-body{ max-height:340px; overflow-y:auto; }
+  .attention.collapsed .attention-body{ display:none; }
+  .attn-row{ display:grid; grid-template-columns: 1.6fr 1fr 1fr 1.4fr; gap:12px; padding:11px 18px; border-bottom:1px solid var(--line); font-size:13px; align-items:center; cursor:pointer; }
+  .attn-row:last-child{ border-bottom:none; }
+  .attn-row:hover{ background:var(--paper); }
+  .attn-row .eq-name{ font-weight:600; color:var(--ink); }
+  .attn-row .eq-serial{ font-family:var(--font-mono); font-size:11px; color:var(--muted-2); margin-top:1px; }
+  .attn-row .eq-loc{ color:var(--muted); font-size:12.5px; }
+  .attn-row .reason{ font-family:var(--font-mono); font-size:11.5px; }
+
+  .pill{ display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:20px; font-size:11px; font-weight:600; letter-spacing:.02em; font-family:var(--font-mono); text-transform:uppercase; white-space:nowrap; }
+  .pill.ok{ background:var(--ok-soft); color:var(--ok); }
+  .pill.bad{ background:var(--bad-soft); color:var(--bad); }
+  .pill.warn{ background:var(--warn-soft); color:var(--warn); }
+  .pill.neutral{ background:#EEF2F1; color:var(--muted); }
+
+  .controls{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:14px; }
+  .search-box{ position:relative; flex:1 1 240px; min-width:200px; }
+  .search-box input{ width:100%; padding:10px 14px 10px 34px; border:1px solid var(--line); border-radius:8px; font-size:13.5px; font-family:var(--font-body); background:var(--panel); color:var(--ink); }
+  .search-box svg{ position:absolute; left:11px; top:50%; transform:translateY(-50%); color:var(--muted-2); }
+  select, input[type=text], input[type=date], textarea{ padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:var(--panel); font-size:13px; color:var(--ink); font-family:var(--font-body); }
+  select{ cursor:pointer; }
+  .btn-reset, .btn-secondary{ padding:10px 14px; border:1px solid var(--line); border-radius:8px; background:var(--panel); color:var(--muted); font-size:13px; cursor:pointer; }
+  .btn-reset:hover{ color:var(--bad); border-color:var(--bad); }
+  .btn-primary{ padding:10px 16px; border:none; border-radius:8px; background:var(--teal); color:#fff; font-size:13px; font-weight:600; cursor:pointer; }
+  .btn-primary:hover{ background:var(--teal-deep); }
+  .btn-primary:disabled{ opacity:0.6; cursor:not-allowed; }
+  .btn-danger{ padding:10px 16px; border:1px solid var(--bad); border-radius:8px; background:var(--bad-soft); color:var(--bad); font-size:13px; font-weight:600; cursor:pointer; }
+  .btn-danger:hover{ background:var(--bad); color:#fff; }
+  .btn-add{ padding:10px 16px; border:none; border-radius:8px; background:var(--ink); color:#fff; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; }
+  .result-count{ font-family:var(--font-mono); font-size:12.5px; color:var(--muted-2); margin-bottom:10px; }
+
+  .table-shell{ background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-sm); }
+  .table-scroll{ max-height:560px; overflow:auto; }
+  table{ width:100%; border-collapse:collapse; font-size:13px; }
+  thead th{ position:sticky; top:0; z-index:2; background:var(--ink); color:#DFEFEC; text-align:left; padding:11px 14px; font-size:11px; text-transform:uppercase; letter-spacing:.06em; font-weight:600; cursor:pointer; white-space:nowrap; user-select:none; }
+  thead th:hover{ background:#123B3B; }
+  thead th .arrow{ opacity:0.5; font-size:10px; margin-left:4px; }
+  tbody td{ padding:10px 14px; border-bottom:1px solid var(--line); vertical-align:middle; color:var(--ink); }
+  tbody tr{ cursor:pointer; transition:background .1s; }
+  tbody tr:hover{ background:var(--teal-soft); }
+  tbody tr:last-child td{ border-bottom:none; }
+  td.mono{ font-family:var(--font-mono); font-size:12px; color:var(--muted); }
+  td.name-cell{ font-weight:600; }
+  .no-results{ padding:40px 20px; text-align:center; color:var(--muted-2); font-size:13.5px; }
+  .skeleton-row td{ color:transparent; }
+  .skeleton-bar{ height:10px; background:linear-gradient(90deg,#EEF2F1 25%,#E4EBE9 37%,#EEF2F1 63%); background-size:400% 100%; border-radius:4px; animation:shimmer 1.4s infinite; }
+  @keyframes shimmer{ 0%{background-position:100% 0;} 100%{background-position:0 0;} }
+
+  .modal-backdrop{ position:fixed; inset:0; background:rgba(11,20,20,0.55); display:none; align-items:center; justify-content:center; padding:20px; z-index:50; }
+  .modal-backdrop.open{ display:flex; }
+  .modal{ background:var(--panel); border-radius:14px; max-width:600px; width:100%; max-height:90vh; overflow-y:auto; box-shadow:0 24px 60px rgba(0,0,0,0.3); }
+  .modal-head{ padding:20px 22px 16px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:flex-start; gap:12px; position:sticky; top:0; background:var(--panel); z-index:1; }
+  .modal-head h2{ margin:0 0 4px; font-size:18px; font-weight:700; }
+  .modal-head .code{ font-family:var(--font-mono); font-size:12px; color:var(--muted-2); }
+  .modal-head-actions{ display:flex; gap:6px; align-items:center; }
+  .icon-btn{ background:var(--paper); border:none; border-radius:50%; width:30px; height:30px; font-size:14px; color:var(--muted); cursor:pointer; flex-shrink:0; line-height:1; }
+  .icon-btn:hover{ background:var(--teal-soft); color:var(--teal); }
+  .icon-btn.close-btn:hover{ background:var(--bad-soft); color:var(--bad); }
+  .modal-body{ padding:18px 22px 24px; }
+  .modal-alert{ background:var(--bad-soft); color:#9A2E2E; border-radius:8px; padding:10px 12px; font-size:13px; margin-bottom:16px; display:flex; gap:8px; align-items:flex-start; }
+  .kv-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px 18px; }
+  .kv{ display:flex; flex-direction:column; gap:3px; }
+  .kv .k{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted-2); font-family:var(--font-mono);}
+  .kv .v{ font-size:13.5px; color:var(--ink); font-weight:500; }
+  .kv .v.mono{ font-family:var(--font-mono); font-weight:400; }
+  .kv.span2{ grid-column:1 / -1; }
+  .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px 14px; }
+  .form-field{ display:flex; flex-direction:column; gap:4px; }
+  .form-field.span2{ grid-column:1 / -1; }
+  .form-field label{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted-2); font-family:var(--font-mono); }
+  .form-field input, .form-field select, .form-field textarea{ width:100%; }
+  .form-field textarea{ resize:vertical; min-height:56px; font-family:var(--font-body); }
+  .modal-actions{ display:flex; justify-content:space-between; gap:10px; margin-top:20px; padding-top:16px; border-top:1px solid var(--line); }
+  .modal-actions .left{ display:flex; gap:8px; }
+  .modal-actions .right{ display:flex; gap:8px; }
+  .field-error{ color:var(--bad); font-size:12px; margin-top:6px; display:none; }
+  .field-error.show{ display:block; }
+
+  .login-modal .modal{ max-width:360px; }
+  .login-modal .form-field{ margin-bottom:12px; }
+  .login-modal .form-field input{ width:100%; }
+
+  footer{ margin-top:44px; padding-top:18px; border-top:1px solid var(--line); font-size:12px; color:var(--muted-2); font-family:var(--font-mono); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+
+  @media (max-width: 980px){
+    .panel-grid{ grid-template-columns:1fr 1fr; }
+    .vitals{ grid-template-columns:1fr 1fr; }
+    .vital{ border-bottom:1px solid rgba(255,255,255,0.12); }
+    .attn-row{ grid-template-columns:1fr; gap:4px; }
+    .form-grid{ grid-template-columns:1fr; }
+  }
+  @media (max-width: 640px){
+    .wrap{ padding:0 14px 48px; }
+    .hero-inner{ padding:20px 14px 0; }
+    .panel-grid{ grid-template-columns:1fr; }
+    .vitals{ grid-template-columns:1fr 1fr; }
+    .hero-title-row{ flex-direction:column; align-items:flex-start; }
+    .hero-right{ align-items:flex-start; }
+    .table-scroll{ max-height:none; }
+    thead{ display:none; }
+    table, tbody, tr, td{ display:block; width:100%; }
+    tbody tr{ border-bottom:8px solid var(--paper); padding:12px 14px; }
+    tbody td{ border:none; padding:4px 0; display:flex; justify-content:space-between; gap:10px; text-align:right; }
+    tbody td::before{ content:attr(data-label); font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted-2); font-family:var(--font-mono); text-align:left; }
+    .kv-grid{ grid-template-columns:1fr; }
+  }
+  @media (prefers-reduced-motion: reduce){ *{ transition:none !important; animation:none !important; } }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="eyebrow"><span class="dot"></span> WESTERN REGION HEALTH DIRECTORATE &nbsp;·&nbsp; CLINICAL ENGINEERING UNIT</div>
+    <div class="hero-title-row">
+      <div>
+        <h1>Equipment Inventory Dashboard</h1>
+        <p class="sub">Live fleet status for the Public Health Reference Laboratory, Sekondi — synced from Supabase in real time.</p>
+      </div>
+      <div class="hero-right">
+        <div class="admin-area" id="adminArea">
+          <button class="btn-admin" id="btnAdminLogin">🔒 Admin sign in</button>
+        </div>
+        <div class="conn-pill"><span class="conn-dot connecting" id="connDot"></span><span id="connLabel">Connecting…</span></div>
+        <div class="hero-clock">
+          <div class="time" id="clockTime">--:--</div>
+          <div class="date" id="clockDate">Loading date…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="vitals" id="vitalsStrip">
+    <div class="vital"><div class="vital-label"><span class="led neutral"></span>Total Assets</div><div class="vital-value">—</div></div>
+    <div class="vital"><div class="vital-label"><span class="led neutral"></span>Functional</div><div class="vital-value">—</div></div>
+    <div class="vital"><div class="vital-label"><span class="led neutral"></span>Non-Functional</div><div class="vital-value">—</div></div>
+    <div class="vital"><div class="vital-label"><span class="led neutral"></span>Calibration Overdue</div><div class="vital-value">—</div></div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="banner error" id="errorBanner">
+    <span id="errorBannerText"></span>
+    <span style="display:flex; gap:8px; flex-shrink:0;">
+      <button class="btn-reset" id="errorBannerRetry" style="display:none; padding:4px 12px; font-size:12px;">Retry</button>
+      <button id="errorBannerClose" aria-label="Dismiss">✕</button>
+    </span>
+  </div>
+  <div class="banner info" id="infoBanner"><span id="infoBannerText"></span><button id="infoBannerClose" aria-label="Dismiss">✕</button></div>
+
+  <section class="section">
+    <div class="section-head">
+      <h2>Fleet Overview</h2>
+      <span class="hint" id="overviewHint"></span>
+    </div>
+    <div class="panel-grid">
+      <div class="panel"><h3>Equipment Condition</h3>
+        <div class="donut-wrap"><svg id="donutChart" width="120" height="120" viewBox="0 0 120 120"></svg><div class="donut-legend" id="donutLegend"></div></div>
+      </div>
+      <div class="panel"><h3>Calibration Status</h3><div class="barlist calbar" id="calBarList"></div></div>
+      <div class="panel"><h3>Assets by Location</h3><div class="barlist" id="locBarList"></div></div>
+      <div class="panel"><h3>Top Manufacturers</h3><div class="barlist" id="manBarList"></div></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2>Needs Attention</h2>
+      <span class="hint">Non-functional units &amp; overdue or missing calibration</span>
+    </div>
+    <div class="attention" id="attentionPanel">
+      <div class="attention-head" id="attentionToggle">
+        <h3>⚠ Items flagged for review <span class="count-badge" id="attnCount">0</span></h3>
+        <span class="toggle-icon">▾</span>
+      </div>
+      <div class="attention-body" id="attentionBody"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2>Full Equipment Register</h2>
+      <span class="hint" id="registerHint">Click any row for full details</span>
+    </div>
+
+    <div class="controls">
+      <div class="search-box">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="searchInput" placeholder="Search by name, serial, code or manufacturer…" autocomplete="off">
+      </div>
+      <select id="filterCondition"><option value="">All conditions</option></select>
+      <select id="filterLocation"><option value="">All locations</option></select>
+      <select id="filterCal"><option value="">All calibration statuses</option></select>
+      <button class="btn-reset" id="resetFilters">Reset filters</button>
+      <button class="btn-add" id="btnAddEquipment" style="display:none;">+ Add Equipment</button>
+    </div>
+
+    <div class="result-count" id="resultCount"></div>
+
+    <div class="table-shell">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th data-sort="id">#</th>
+              <th data-sort="name">Equipment</th>
+              <th data-sort="serial">Serial No.</th>
+              <th data-sort="location">Location</th>
+              <th data-sort="condition">Condition</th>
+              <th data-sort="manufacturer">Manufacturer</th>
+              <th data-sort="installDate">Installed</th>
+              <th data-sort="calibrationStatus">Calibration</th>
+              <th data-sort="nextCalibration">Next Cal.</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr class="skeleton-row"><td colspan="9"><div class="skeleton-bar"></div></td></tr>
+            <tr class="skeleton-row"><td colspan="9"><div class="skeleton-bar"></div></td></tr>
+            <tr class="skeleton-row"><td colspan="9"><div class="skeleton-bar"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>CEU Dashboard — live equipment register · <span id="footCount">—</span> assets on record</span>
+    <span>Backend: Supabase (Postgres + RLS) · Realtime sync enabled</span>
+  </footer>
+</div>
+
+<!-- Detail / Edit modal -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-head">
+      <div>
+        <h2 id="modalTitle">—</h2>
+        <div class="code" id="modalCode">—</div>
+      </div>
+      <div class="modal-head-actions">
+        <button class="icon-btn" id="modalEditBtn" title="Edit" style="display:none;">✎</button>
+        <button class="icon-btn close-btn" id="modalClose" aria-label="Close details">✕</button>
+      </div>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- Admin login modal -->
+<div class="modal-backdrop login-modal" id="loginBackdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+    <div class="modal-head">
+      <div><h2 id="loginTitle">Admin sign in</h2><div class="code">Authorized personnel only</div></div>
+      <button class="icon-btn close-btn" id="loginClose" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-field"><label>Email</label><input type="text" id="loginEmail" autocomplete="username"></div>
+      <div class="form-field"><label>Password</label><input type="password" id="loginPassword" autocomplete="current-password"></div>
+      <div class="field-error" id="loginError"></div>
+      <button class="btn-primary" id="loginSubmit" style="width:100%;">Sign in</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  // =====================================================================
+  // CONFIG
+  // This is the Supabase "publishable" key. It is DESIGNED to be public -
+  // it identifies the project only. All access control is enforced by
+  // Postgres Row Level Security policies on the server, not by hiding
+  // this key. Never put a service_role key in client-side code.
+  // =====================================================================
+  var SUPABASE_URL = 'https://ehkgmtvqfzjevxyaxrjp.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_4LM2FLUIU_fYJZodYlYmXw_YU2lCR7t';
+
+  var CONDITION_OPTIONS = ['FUNCTIONAL','NON-FUNCTIONAL','UNKNOWN'];
+  var CAL_STATUS_OPTIONS = ['PASSED CALIBRATION','NOT CALIBRATED','OUT OF CALIBRATION','Not Applicable','Not Specified'];
+
+  if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
+    document.addEventListener('DOMContentLoaded', function(){
+      showError('Could not load the Supabase client library. Check your internet connection and reload the page.');
+    });
+    return;
+  }
+
+  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true }
+  });
+
+  // ---------- Safe helpers ----------
+  function esc(str){
+    if(str === null || str === undefined) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+  function dash(v){ return (v === null || v === undefined || v === '') ? '—' : v; }
+
+  var DATA = [];
+  var isAdmin = false;
+  var currentSession = null;
+  var TODAY = new Date(); TODAY.setHours(0,0,0,0);
+
+  function parseISO(s){
+    if(!s || typeof s !== 'string') return null;
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+    if(!m) return null;
+    var d = new Date(Number(m[1]), Number(m[2])-1, Number(m[3]));
+    return isNaN(d.getTime()) ? null : d;
+  }
+  function fmtDate(s){
+    var d = parseISO(s);
+    if(!d) return dash(s);
+    return d.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
+  }
+  function isOverdue(rec){
+    var d = parseISO(rec.nextCalibration);
+    return !!d && d < TODAY;
+  }
+  function needsAttention(rec){
+    return rec.condition === 'NON-FUNCTIONAL' ||
+           rec.calibrationStatus === 'OUT OF CALIBRATION' ||
+           rec.calibrationStatus === 'NOT CALIBRATED' ||
+           isOverdue(rec);
+  }
+  function attentionReason(rec){
+    var reasons = [];
+    if(rec.condition === 'NON-FUNCTIONAL') reasons.push('Non-functional');
+    if(isOverdue(rec)) reasons.push('Calibration overdue');
+    else if(rec.calibrationStatus === 'OUT OF CALIBRATION') reasons.push('Out of calibration');
+    else if(rec.calibrationStatus === 'NOT CALIBRATED') reasons.push('Not calibrated');
+    return reasons.join(' · ');
+  }
+  function conditionPillClass(c){
+    if(c === 'FUNCTIONAL') return 'ok';
+    if(c === 'NON-FUNCTIONAL') return 'bad';
+    return 'neutral';
+  }
+  function calPillClass(c){
+    if(c === 'PASSED CALIBRATION') return 'ok';
+    if(c === 'OUT OF CALIBRATION' || c === 'NOT CALIBRATED') return 'bad';
+    if(c === 'Not Applicable') return 'neutral';
+    return 'warn';
+  }
+
+  // Map DB row (snake_case) -> app record (camelCase)
+  function mapRow(r){
+    return {
+      id: r.id, name: r.name, serial: r.serial, code: r.code, location: r.location,
+      condition: r.condition, manufacturer: r.manufacturer,
+      installDate: r.install_date, entryDate: r.entry_date, owner: r.owner,
+      lastService: r.last_service, servicedBy: r.serviced_by,
+      calibrationStatus: r.calibration_status, nextCalibration: r.next_calibration,
+      comment: r.comment
+    };
+  }
+  // Map form values (camelCase) -> DB row (snake_case) for writes
+  function toDbRow(f){
+    return {
+      name: f.name, serial: f.serial || null, code: f.code || null, location: f.location,
+      condition: f.condition, manufacturer: f.manufacturer,
+      install_date: f.installDate || null, entry_date: f.entryDate || null, owner: f.owner || null,
+      last_service: f.lastService || null, serviced_by: f.servicedBy || null,
+      calibration_status: f.calibrationStatus, next_calibration: f.nextCalibration || null,
+      comment: f.comment || null
+    };
+  }
+
+  // ---------- Banners ----------
+  function showError(msg, retryFn){
+    var b = document.getElementById('errorBanner');
+    document.getElementById('errorBannerText').textContent = msg;
+    var retryBtn = document.getElementById('errorBannerRetry');
+    if(typeof retryFn === 'function'){
+      retryBtn.style.display = 'inline-block';
+      retryBtn.onclick = function(){ hideError(); retryFn(); };
+    } else {
+      retryBtn.style.display = 'none';
+      retryBtn.onclick = null;
+    }
+    b.classList.add('show');
+  }
+  function hideError(){ document.getElementById('errorBanner').classList.remove('show'); }
+  // Turns any thrown value into a short, honest, human-readable string.
+  // Never assumes it's a standard Error - fetch wrappers, RLS errors, and
+  // sandboxed preview shells can all throw plain objects or DOM exceptions.
+  function describeError(err){
+    if(!err) return 'Unknown error';
+    if(err.name === 'DataCloneError' || /postMessage|could not be cloned/i.test(err.message||'')){
+      return 'A browser extension or preview environment is interfering with network requests on this page (not a server or data issue). Try opening this file directly in a normal browser tab instead of an in-app preview.';
+    }
+    if(err.code === '42501') return 'You do not have permission to make this change. Your session may have expired - try signing in again.';
+    if(err.message) return err.message;
+    try{ return JSON.stringify(err); }catch(e){ return String(err); }
+  }
+  function showInfo(msg){
+    var b = document.getElementById('infoBanner');
+    document.getElementById('infoBannerText').textContent = msg;
+    b.classList.add('show');
+    clearTimeout(showInfo._t);
+    showInfo._t = setTimeout(hideInfo, 4000);
+  }
+  function hideInfo(){ document.getElementById('infoBanner').classList.remove('show'); }
+  document.getElementById('errorBannerClose').addEventListener('click', hideError);
+  document.getElementById('infoBannerClose').addEventListener('click', hideInfo);
+
+  // ---------- Connection status ----------
+  function setConnStatus(state){
+    var dot = document.getElementById('connDot');
+    var label = document.getElementById('connLabel');
+    dot.className = 'conn-dot ' + state;
+    if(state === 'live') label.textContent = 'Live';
+    else if(state === 'connecting') label.textContent = 'Connecting…';
+    else label.textContent = 'Offline';
+  }
+
+  // ---------- Clock ----------
+  function tickClock(){
+    var now = new Date();
+    document.getElementById('clockTime').textContent = now.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+    document.getElementById('clockDate').textContent = now.toLocaleDateString('en-GB', {weekday:'long', day:'2-digit', month:'long', year:'numeric'});
+  }
+  tickClock();
+  setInterval(tickClock, 30000);
+
+  // ---------- Aggregation + full render ----------
+  function countBy(key){
+    var map = {};
+    DATA.forEach(function(d){ var k = d[key] || 'Unspecified'; map[k] = (map[k]||0)+1; });
+    return map;
+  }
+  function sortEntriesDesc(map){
+    return Object.keys(map).map(function(k){ return [k, map[k]]; }).sort(function(a,b){ return b[1]-a[1]; });
+  }
+
+  function renderVitals(){
+    var total = DATA.length;
+    var functional = DATA.filter(function(d){ return d.condition === 'FUNCTIONAL'; }).length;
+    var nonFunctional = DATA.filter(function(d){ return d.condition === 'NON-FUNCTIONAL'; }).length;
+    var overdueCount = DATA.filter(isOverdue).length;
+    var items = [
+      {label:'Total Assets', value: total, led:'neutral'},
+      {label:'Functional', value: functional, suffix:'/ ' + total, led:'ok'},
+      {label:'Non-Functional', value: nonFunctional, led: nonFunctional>0 ? 'bad':'ok'},
+      {label:'Calibration Overdue', value: overdueCount, led: overdueCount>0 ? 'warn':'ok'}
+    ];
+    document.getElementById('vitalsStrip').innerHTML = items.map(function(it){
+      return '<div class="vital"><div class="vital-label"><span class="led '+it.led+'"></span>'+esc(it.label)+'</div>'+
+        '<div class="vital-value">'+it.value+(it.suffix?'<small>'+esc(it.suffix)+'</small>':'')+'</div></div>';
+    }).join('');
+    document.getElementById('footCount').textContent = total;
+    document.getElementById('overviewHint').textContent = total + ' assets across ' + Object.keys(countBy('location')).length + ' locations';
+  }
+
+  function renderDonut(){
+    var svg = document.getElementById('donutChart');
+    var legend = document.getElementById('donutLegend');
+    var colors = { 'FUNCTIONAL':'#1E9E64', 'NON-FUNCTIONAL':'#D14343', 'UNKNOWN':'#8B9997' };
+    var byCondition = countBy('condition');
+    var entries = sortEntriesDesc(byCondition);
+    var total = DATA.length;
+    var r=46, cx=60, cy=60, circumference=2*Math.PI*r, offset=0, paths='';
+    entries.forEach(function(entry){
+      var key=entry[0], count=entry[1];
+      var frac = total ? count/total : 0;
+      var dashLen = frac*circumference;
+      var color = colors[key] || '#8B9997';
+      paths += '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="16" stroke-dasharray="'+dashLen.toFixed(2)+' '+(circumference-dashLen).toFixed(2)+'" stroke-dashoffset="'+(-offset).toFixed(2)+'" transform="rotate(-90 '+cx+' '+cy+')"></circle>';
+      offset += dashLen;
+    });
+    svg.innerHTML = '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="#EEF2F1" stroke-width="16"></circle>' + paths +
+      '<text x="'+cx+'" y="'+(cy-3)+'" text-anchor="middle" font-family="DM Mono, monospace" font-size="22" font-weight="500" fill="#0E2A2E">'+total+'</text>' +
+      '<text x="'+cx+'" y="'+(cy+14)+'" text-anchor="middle" font-family="DM Mono, monospace" font-size="9" letter-spacing="1" fill="#8B9997">TOTAL</text>';
+    legend.innerHTML = entries.map(function(entry){
+      var key=entry[0], count=entry[1]; var color = colors[key] || '#8B9997';
+      var pct = total ? Math.round((count/total)*100) : 0;
+      return '<div class="row"><span class="k"><span class="sw" style="background:'+color+'"></span>'+esc(key)+'</span><span class="v">'+count+' · '+pct+'%</span></div>';
+    }).join('');
+  }
+
+  function renderBarList(elId, map, colorFn){
+    var el = document.getElementById(elId);
+    var entries = sortEntriesDesc(map);
+    if(elId === 'manBarList') entries = entries.slice(0,8);
+    var max = entries.length ? Math.max.apply(null, entries.map(function(e){return e[1];})) : 1;
+    el.innerHTML = entries.map(function(entry){
+      var key=entry[0], count=entry[1];
+      var cls = colorFn ? colorFn(key) : '';
+      var pct = Math.round((count/max)*100);
+      return '<div class="item"><div class="name" title="'+esc(key)+'">'+esc(key)+'</div>'+
+        '<div class="track"><div class="fill '+cls+'" style="width:'+pct+'%"></div></div>'+
+        '<div class="count">'+count+'</div></div>';
+    }).join('');
+  }
+
+  var attentionCollapsed = false;
+  function renderAttention(){
+    var list = DATA.filter(needsAttention);
+    document.getElementById('attnCount').textContent = list.length;
+    var body = document.getElementById('attentionBody');
+    if(list.length === 0){
+      body.innerHTML = '<div class="no-results">No flagged equipment — fleet is in good standing.</div>';
+      return;
+    }
+    var sorted = list.slice().sort(function(a,b){
+      var score = function(r){ return r.condition==='NON-FUNCTIONAL' ? 0 : (isOverdue(r) ? 1 : 2); };
+      return score(a)-score(b);
+    });
+    body.innerHTML = sorted.map(function(rec){
+      var pillClass = conditionPillClass(rec.condition);
+      return '<div class="attn-row" data-id="'+rec.id+'"><div><div class="eq-name">'+esc(rec.name)+'</div><div class="eq-serial">S/N '+esc(dash(rec.serial))+'</div></div>'+
+        '<div class="eq-loc">'+esc(rec.location)+'</div>'+
+        '<div><span class="pill '+pillClass+'">'+esc(rec.condition)+'</span></div>'+
+        '<div class="reason">'+esc(attentionReason(rec))+'</div></div>';
+    }).join('');
+  }
+
+  // ---------- Filters / search / sort state ----------
+  var currentSort = { key: 'id', dir: 1 };
+
+  function populateFilterOptions(){
+    function uniqueSorted(key){
+      var set = {}; DATA.forEach(function(d){ if(d[key]) set[d[key]] = true; });
+      return Object.keys(set).sort();
+    }
+    function fill(sel, values){
+      var current = sel.value;
+      var placeholder = sel.options[0];
+      sel.innerHTML = '';
+      sel.appendChild(placeholder);
+      values.forEach(function(v){ var o=document.createElement('option'); o.value=v; o.textContent=v; sel.appendChild(o); });
+      if(values.indexOf(current) !== -1) sel.value = current;
+    }
+    fill(document.getElementById('filterCondition'), uniqueSorted('condition'));
+    fill(document.getElementById('filterLocation'), uniqueSorted('location'));
+    fill(document.getElementById('filterCal'), uniqueSorted('calibrationStatus'));
+  }
+
+  function getFiltered(){
+    var q = document.getElementById('searchInput').value.trim().toLowerCase();
+    var cond = document.getElementById('filterCondition').value;
+    var loc = document.getElementById('filterLocation').value;
+    var cal = document.getElementById('filterCal').value;
+    return DATA.filter(function(d){
+      if(cond && d.condition !== cond) return false;
+      if(loc && d.location !== loc) return false;
+      if(cal && d.calibrationStatus !== cal) return false;
+      if(q){
+        var hay = (d.name+' '+(d.serial||'')+' '+(d.code||'')+' '+d.manufacturer).toLowerCase();
+        if(hay.indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+  }
+  function sortRows(rows){
+    var key = currentSort.key, dir = currentSort.dir;
+    return rows.slice().sort(function(a,b){
+      var av=a[key], bv=b[key];
+      if(key==='id'){ av=Number(av); bv=Number(bv); }
+      if(key==='installDate' || key==='nextCalibration'){ av = av || '0000-00-00'; bv = bv || '0000-00-00'; }
+      if(av===null||av===undefined) av='';
+      if(bv===null||bv===undefined) bv='';
+      if(av<bv) return -1*dir;
+      if(av>bv) return 1*dir;
+      return 0;
+    });
+  }
+
+  function renderTable(){
+    var filtered = getFiltered();
+    var sorted = sortRows(filtered);
+    document.getElementById('resultCount').textContent = 'Showing ' + sorted.length + ' of ' + DATA.length + ' assets';
+    var tbody = document.getElementById('tableBody');
+    if(sorted.length === 0){
+      tbody.innerHTML = '<tr><td colspan="9"><div class="no-results">No equipment matches these filters.</div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = sorted.map(function(rec){
+      var condCls = conditionPillClass(rec.condition);
+      var calCls = calPillClass(rec.calibrationStatus);
+      var overdue = isOverdue(rec);
+      return '<tr data-id="'+rec.id+'">'+
+        '<td data-label="#" class="mono">'+rec.id+'</td>'+
+        '<td data-label="Equipment" class="name-cell">'+esc(rec.name)+'</td>'+
+        '<td data-label="Serial No." class="mono">'+esc(dash(rec.serial))+'</td>'+
+        '<td data-label="Location">'+esc(rec.location)+'</td>'+
+        '<td data-label="Condition"><span class="pill '+condCls+'">'+esc(rec.condition)+'</span></td>'+
+        '<td data-label="Manufacturer">'+esc(rec.manufacturer)+'</td>'+
+        '<td data-label="Installed" class="mono">'+fmtDate(rec.installDate)+'</td>'+
+        '<td data-label="Calibration"><span class="pill '+calCls+'">'+esc(rec.calibrationStatus)+'</span></td>'+
+        '<td data-label="Next Cal." class="mono">'+(overdue?'<span style="color:#D14343;font-weight:600;">'+fmtDate(rec.nextCalibration)+' ⚠</span>':fmtDate(rec.nextCalibration))+'</td>'+
+      '</tr>';
+    }).join('');
+  }
+
+  function renderAll(){
+    renderVitals();
+    renderDonut();
+    renderBarList('calBarList', countBy('calibrationStatus'), calPillClass);
+    renderBarList('locBarList', countBy('location'), null);
+    renderBarList('manBarList', countBy('manufacturer'), null);
+    renderAttention();
+    populateFilterOptions();
+    renderTable();
+  }
+
+  ['searchInput'].forEach(function(id){ document.getElementById(id).addEventListener('input', renderTable); });
+  ['filterCondition','filterLocation','filterCal'].forEach(function(id){ document.getElementById(id).addEventListener('change', renderTable); });
+  document.getElementById('resetFilters').addEventListener('click', function(){
+    document.getElementById('searchInput').value = '';
+    document.getElementById('filterCondition').value = '';
+    document.getElementById('filterLocation').value = '';
+    document.getElementById('filterCal').value = '';
+    renderTable();
+  });
+  document.querySelectorAll('thead th[data-sort]').forEach(function(th){
+    th.addEventListener('click', function(){
+      var key = th.getAttribute('data-sort');
+      if(currentSort.key === key) currentSort.dir *= -1;
+      else { currentSort.key = key; currentSort.dir = 1; }
+      document.querySelectorAll('thead th[data-sort] .arrow').forEach(function(a){ a.remove(); });
+      var arrow = document.createElement('span'); arrow.className='arrow'; arrow.textContent = currentSort.dir===1?'▲':'▼';
+      th.appendChild(arrow);
+      renderTable();
+    });
+  });
+  document.getElementById('attentionToggle').addEventListener('click', function(){
+    attentionCollapsed = !attentionCollapsed;
+    document.getElementById('attentionPanel').classList.toggle('collapsed', attentionCollapsed);
+  });
+
+  function findById(id){ for(var i=0;i<DATA.length;i++){ if(DATA[i].id === id) return DATA[i]; } return null; }
+
+  // ---------- Data loading ----------
+  // Auto-retries transient failures (weak connection, Supabase free-tier
+  // project waking up from an idle pause) before asking the user to retry
+  // manually, so a momentary blip doesn't strand the page on first load.
+  async function loadEquipment(attempt){
+    attempt = attempt || 1;
+    var MAX_AUTO_RETRIES = 3;
+    try{
+      var res = await sb.from('equipment').select('*').order('id', {ascending:true});
+      if(res.error) throw res.error;
+      DATA = (res.data || []).map(mapRow);
+      hideError();
+      renderAll();
+    }catch(err){
+      console.error('loadEquipment failed (attempt ' + attempt + ')', describeError(err), err);
+      if(attempt < MAX_AUTO_RETRIES){
+        setTimeout(function(){ loadEquipment(attempt + 1); }, attempt * 1200);
+        return;
+      }
+      showError('Could not load equipment data from the server. ' + describeError(err), function(){ loadEquipment(1); });
+    }
+  }
+
+  // ---------- Realtime ----------
+  function applyRealtimeChange(payload){
+    if(payload.eventType === 'INSERT'){
+      var rec = mapRow(payload.new);
+      if(!findById(rec.id)) DATA.push(rec);
+    } else if(payload.eventType === 'UPDATE'){
+      var updated = mapRow(payload.new);
+      var idx = DATA.findIndex(function(d){ return d.id === updated.id; });
+      if(idx !== -1) DATA[idx] = updated; else DATA.push(updated);
+    } else if(payload.eventType === 'DELETE'){
+      var oldId = payload.old && payload.old.id;
+      DATA = DATA.filter(function(d){ return d.id !== oldId; });
+    }
+    renderAll();
+  }
+
+  function startRealtime(){
+    setConnStatus('connecting');
+    var channel = sb.channel('equipment-live')
+      .on('postgres_changes', {event:'*', schema:'public', table:'equipment'}, function(payload){
+        applyRealtimeChange(payload);
+        showInfo('Equipment list updated');
+      })
+      .subscribe(function(status){
+        if(status === 'SUBSCRIBED') setConnStatus('live');
+        else if(status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') setConnStatus('offline');
+        else setConnStatus('connecting');
+      });
+    return channel;
+  }
+
+  // ---------- Admin auth ----------
+  async function refreshAdminState(){
+    try{
+      var sres = await sb.auth.getSession();
+      currentSession = sres.data && sres.data.session ? sres.data.session : null;
+      if(!currentSession){ setAdmin(false); return; }
+      var user = currentSession.user;
+      var ares = await sb.from('admins').select('user_id').eq('user_id', user.id).maybeSingle();
+      if(ares.error){ setAdmin(false); return; }
+      setAdmin(!!ares.data, user.email);
+    }catch(err){
+      console.error('refreshAdminState failed', err);
+      setAdmin(false);
+    }
+  }
+  function setAdmin(flag, email){
+    isAdmin = flag;
+    var area = document.getElementById('adminArea');
+    var addBtn = document.getElementById('btnAddEquipment');
+    if(isAdmin){
+      area.innerHTML = '<span class="admin-badge">● Admin: '+esc(email||'')+'</span>'+
+        '<button class="btn-admin" id="btnAdminLogout">Sign out</button>';
+      document.getElementById('btnAdminLogout').addEventListener('click', doLogout);
+      addBtn.style.display = 'inline-flex';
+    } else {
+      area.innerHTML = '<button class="btn-admin" id="btnAdminLogin">🔒 Admin sign in</button>';
+      document.getElementById('btnAdminLogin').addEventListener('click', openLogin);
+      addBtn.style.display = 'none';
+    }
+    renderTable(); // re-render in case modal edit affordances need it
+  }
+  async function doLogout(){
+    try{ await sb.auth.signOut(); }catch(e){ console.error(e); }
+    await refreshAdminState();
+    showInfo('Signed out.');
+  }
+
+  document.getElementById('btnAdminLogin').addEventListener('click', openLogin);
+  document.getElementById('btnAddEquipment').addEventListener('click', function(){ openModal(null); });
+
+  function openLogin(){
+    document.getElementById('loginEmail').value = '';
+    document.getElementById('loginPassword').value = '';
+    document.getElementById('loginError').classList.remove('show');
+    document.getElementById('loginBackdrop').classList.add('open');
+    document.getElementById('loginEmail').focus();
+  }
+  function closeLogin(){ document.getElementById('loginBackdrop').classList.remove('open'); }
+  document.getElementById('loginClose').addEventListener('click', closeLogin);
+  document.getElementById('loginBackdrop').addEventListener('click', function(e){ if(e.target === this) closeLogin(); });
+  document.getElementById('loginSubmit').addEventListener('click', submitLogin);
+  document.getElementById('loginPassword').addEventListener('keydown', function(e){ if(e.key==='Enter') submitLogin(); });
+
+  async function submitLogin(){
+    var email = document.getElementById('loginEmail').value.trim();
+    var password = document.getElementById('loginPassword').value;
+    var errEl = document.getElementById('loginError');
+    errEl.classList.remove('show');
+    if(!email || !password){
+      errEl.textContent = 'Enter both email and password.';
+      errEl.classList.add('show');
+      return;
+    }
+    var btn = document.getElementById('loginSubmit');
+    btn.disabled = true; btn.textContent = 'Signing in…';
+    try{
+      var res = await sb.auth.signInWithPassword({ email: email, password: password });
+      if(res.error) throw res.error;
+      await refreshAdminState();
+      if(!isAdmin){
+        // Signed in successfully but not on the admin allowlist - sign back out.
+        await sb.auth.signOut();
+        errEl.textContent = 'This account is not authorized as an admin.';
+        errEl.classList.add('show');
+        return;
+      }
+      closeLogin();
+      showInfo('Signed in as admin.');
+    }catch(err){
+      errEl.textContent = 'Sign-in failed. Check your email and password.';
+      errEl.classList.add('show');
+    }finally{
+      btn.disabled = false; btn.textContent = 'Sign in';
+    }
+  }
+
+  sb.auth.onAuthStateChange(function(){ refreshAdminState(); });
+
+  // ---------- Detail / Edit modal ----------
+  var modalBackdrop = document.getElementById('modalBackdrop');
+  var modalTitle = document.getElementById('modalTitle');
+  var modalCode = document.getElementById('modalCode');
+  var modalBody = document.getElementById('modalBody');
+  var lastFocused = null;
+  var modalMode = 'view'; // 'view' | 'edit' | 'new'
+  var modalRecordId = null;
+
+  function kv(label, valueHtml, span2, mono){
+    return '<div class="kv'+(span2?' span2':'')+'"><div class="k">'+esc(label)+'</div><div class="v'+(mono?' mono':'')+'">'+valueHtml+'</div></div>';
+  }
+
+  function renderViewMode(rec){
+    modalTitle.textContent = rec.name;
+    modalCode.textContent = (rec.code||'—') + '  ·  S/N ' + (rec.serial||'—');
+    document.getElementById('modalEditBtn').style.display = isAdmin ? 'inline-flex' : 'none';
+    var alertHtml = rec.comment ? '<div class="modal-alert">⚠ <div><strong>Comment:</strong> '+esc(rec.comment)+'</div></div>' : '';
+    var condCls = conditionPillClass(rec.condition);
+    var calCls = calPillClass(rec.calibrationStatus);
+    var overdue = isOverdue(rec);
+    modalBody.innerHTML = alertHtml + '<div class="kv-grid">' +
+      kv('Condition', '<span class="pill '+condCls+'">'+esc(rec.condition)+'</span>', true) +
+      kv('Calibration Status', '<span class="pill '+calCls+'">'+esc(rec.calibrationStatus)+'</span>', true) +
+      kv('Location / Purpose', esc(rec.location)) +
+      kv('Manufacturer', esc(rec.manufacturer)) +
+      kv('Serial / Model No.', esc(dash(rec.serial)), false, true) +
+      kv('Equipment Code', esc(dash(rec.code)), false, true) +
+      kv('Installation Date', fmtDate(rec.installDate), false, true) +
+      kv('Entry Into Service', fmtDate(rec.entryDate), false, true) +
+      kv('Owner', esc(dash(rec.owner))) +
+      kv('Last Service', rec.lastService === 'Pending' ? 'Pending' : fmtDate(rec.lastService), false, true) +
+      kv('Serviced By', esc(dash(rec.servicedBy))) +
+      kv('Next Calibration', (overdue ? '<span style="color:#D14343;font-weight:600">'+fmtDate(rec.nextCalibration)+' — overdue</span>' : fmtDate(rec.nextCalibration)), true, true) +
+    '</div>';
+  }
+
+  function opt(list, current){
+    return list.map(function(v){ return '<option value="'+esc(v)+'"'+(v===current?' selected':'')+'>'+esc(v)+'</option>'; }).join('');
+  }
+
+  function renderFormMode(rec){
+    var isNew = !rec;
+    var r = rec || { name:'', serial:'', code:'', location:'', condition:'FUNCTIONAL', manufacturer:'', installDate:'', entryDate:'', owner:'', lastService:'', servicedBy:'', calibrationStatus:'Not Specified', nextCalibration:'', comment:'' };
+    modalTitle.textContent = isNew ? 'Add Equipment' : ('Editing: ' + r.name);
+    modalCode.textContent = isNew ? 'New record' : (r.code || '—');
+    document.getElementById('modalEditBtn').style.display = 'none';
+
+    modalBody.innerHTML =
+      '<div class="form-grid">' +
+        field('name','Equipment Name','text', r.name, true) +
+        field('location','Location / Purpose','text', r.location, true) +
+        selectField('condition','Condition', CONDITION_OPTIONS, r.condition) +
+        selectField('calibrationStatus','Calibration Status', CAL_STATUS_OPTIONS, r.calibrationStatus) +
+        field('manufacturer','Manufacturer','text', r.manufacturer) +
+        field('serial','Serial / Model No.','text', r.serial) +
+        field('code','Equipment Code','text', r.code) +
+        field('owner','Owner','text', r.owner) +
+        field('installDate','Installation Date','date', r.installDate) +
+        field('entryDate','Entry Into Service','date', r.entryDate) +
+        field('nextCalibration','Next Calibration','date', r.nextCalibration) +
+        field('lastService','Last Service (date or "Pending")','text', r.lastService) +
+        field('servicedBy','Serviced By','text', r.servicedBy) +
+        textareaField('comment','Comment / Alert', r.comment) +
+      '</div>' +
+      '<div class="field-error" id="formError"></div>' +
+      '<div class="modal-actions">' +
+        '<div class="left">' + (isNew ? '' : '<button class="btn-danger" id="btnDelete">Delete</button>') + '</div>' +
+        '<div class="right"><button class="btn-secondary" id="btnCancelEdit">Cancel</button><button class="btn-primary" id="btnSaveEdit">'+(isNew?'Add Equipment':'Save Changes')+'</button></div>' +
+      '</div>';
+
+    document.getElementById('btnCancelEdit').addEventListener('click', function(){
+      if(isNew) closeModal(); else openModal(rec.id);
+    });
+    document.getElementById('btnSaveEdit').addEventListener('click', function(){ submitForm(isNew, rec ? rec.id : null); });
+    if(!isNew){
+      document.getElementById('btnDelete').addEventListener('click', function(){ confirmDelete(rec.id, rec.name); });
+    }
+  }
+
+  function field(id, label, type, value, required){
+    return '<div class="form-field"><label>'+esc(label)+(required?' *':'')+'</label>'+
+      '<input type="'+type+'" id="f_'+id+'" value="'+esc(value||'')+'"></div>';
+  }
+  function selectField(id, label, options, current){
+    return '<div class="form-field"><label>'+esc(label)+'</label><select id="f_'+id+'">'+opt(options, current)+'</select></div>';
+  }
+  function textareaField(id, label, value){
+    return '<div class="form-field span2"><label>'+esc(label)+'</label><textarea id="f_'+id+'">'+esc(value||'')+'</textarea></div>';
+  }
+
+  function readForm(){
+    return {
+      name: document.getElementById('f_name').value.trim(),
+      location: document.getElementById('f_location').value.trim(),
+      condition: document.getElementById('f_condition').value,
+      calibrationStatus: document.getElementById('f_calibrationStatus').value,
+      manufacturer: document.getElementById('f_manufacturer').value.trim() || 'Unknown',
+      serial: document.getElementById('f_serial').value.trim(),
+      code: document.getElementById('f_code').value.trim(),
+      owner: document.getElementById('f_owner').value.trim(),
+      installDate: document.getElementById('f_installDate').value,
+      entryDate: document.getElementById('f_entryDate').value,
+      nextCalibration: document.getElementById('f_nextCalibration').value,
+      lastService: document.getElementById('f_lastService').value.trim(),
+      servicedBy: document.getElementById('f_servicedBy').value.trim(),
+      comment: document.getElementById('f_comment').value.trim()
+    };
+  }
+
+  // Serial numbers are the primary physical identifier for equipment, so a
+  // collision is worth an explicit human decision rather than a silent DB
+  // rejection or a silent pass-through. Not a hard block: legitimate source
+  // data already has at least one legacy duplicate, so we warn and require
+  // a second confirming click rather than refusing outright.
+  function findDuplicateSerial(serial, excludeId){
+    if(!serial) return null;
+    var s = serial.trim().toLowerCase();
+    if(!s || s === 'n/a') return null;
+    return DATA.find(function(d){ return d.id !== excludeId && d.serial && d.serial.trim().toLowerCase() === s; }) || null;
+  }
+
+  async function submitForm(isNew, id){
+    var errEl = document.getElementById('formError');
+    errEl.classList.remove('show');
+    var form = readForm();
+    if(!form.name){ errEl.textContent = 'Equipment name is required.'; errEl.classList.add('show'); return; }
+    if(!form.location){ errEl.textContent = 'Location is required.'; errEl.classList.add('show'); return; }
+
+    var saveBtn = document.getElementById('btnSaveEdit');
+    var dup = findDuplicateSerial(form.serial, isNew ? null : id);
+    if(dup && saveBtn.getAttribute('data-confirmed-serial') !== form.serial){
+      errEl.textContent = 'Serial "'+form.serial+'" is already recorded for "'+dup.name+'" (ID #'+dup.id+'). Click Save again to confirm this is correct.';
+      errEl.classList.add('show');
+      saveBtn.setAttribute('data-confirmed-serial', form.serial);
+      saveBtn.textContent = 'Save Anyway';
+      return;
+    }
+
+    saveBtn.disabled = true; saveBtn.textContent = 'Saving…';
+    try{
+      var row = toDbRow(form);
+      var res;
+      if(isNew){
+        res = await sb.from('equipment').insert(row).select().single();
+      } else {
+        res = await sb.from('equipment').update(row).eq('id', id).select().single();
+      }
+      if(res.error) throw res.error;
+      // Optimistic local update; realtime will also confirm/reconcile.
+      var mapped = mapRow(res.data);
+      var idx = DATA.findIndex(function(d){ return d.id === mapped.id; });
+      if(idx !== -1) DATA[idx] = mapped; else DATA.push(mapped);
+      renderAll();
+      closeModal();
+      showInfo(isNew ? 'Equipment added.' : 'Changes saved.');
+    }catch(err){
+      console.error('save failed', describeError(err), err);
+      errEl.textContent = 'Save failed: ' + describeError(err);
+      errEl.classList.add('show');
+    }finally{
+      saveBtn.disabled = false; saveBtn.textContent = isNew ? 'Add Equipment' : 'Save Changes';
+    }
+  }
+
+  function confirmDelete(id, name){
+    if(!window.confirm('Delete "' + name + '"? This cannot be undone.')) return;
+    (async function(){
+      try{
+        var res = await sb.from('equipment').delete().eq('id', id);
+        if(res.error) throw res.error;
+        DATA = DATA.filter(function(d){ return d.id !== id; });
+        renderAll();
+        closeModal();
+        showInfo('Equipment deleted.');
+      }catch(err){
+        console.error('delete failed', describeError(err), err);
+        showError('Delete failed: ' + describeError(err));
+      }
+    })();
+  }
+
+  function openModal(id){
+    lastFocused = document.activeElement;
+    if(id === null){
+      modalMode = 'new'; modalRecordId = null;
+      renderFormMode(null);
+    } else {
+      var rec = findById(id);
+      if(!rec) return;
+      modalMode = 'view'; modalRecordId = id;
+      renderViewMode(rec);
+    }
+    modalBackdrop.classList.add('open');
+    document.addEventListener('keydown', onModalKeydown);
+  }
+  document.getElementById('modalEditBtn').addEventListener('click', function(){
+    if(modalRecordId === null) return;
+    var rec = findById(modalRecordId);
+    modalMode = 'edit';
+    renderFormMode(rec);
+  });
+  function closeModal(){
+    modalBackdrop.classList.remove('open');
+    document.removeEventListener('keydown', onModalKeydown);
+    if(lastFocused && typeof lastFocused.focus === 'function') lastFocused.focus();
+  }
+  function onModalKeydown(e){ if(e.key === 'Escape') closeModal(); }
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  modalBackdrop.addEventListener('click', function(e){ if(e.target === modalBackdrop) closeModal(); });
+
+  document.getElementById('tableBody').addEventListener('click', function(e){
+    var row = e.target.closest('tr[data-id]');
+    if(row) openModal(Number(row.getAttribute('data-id')));
+  });
+  document.getElementById('attentionBody').addEventListener('click', function(e){
+    var row = e.target.closest('.attn-row[data-id]');
+    if(row) openModal(Number(row.getAttribute('data-id')));
+  });
+
+  // ---------- Boot ----------
+  (async function boot(){
+    await loadEquipment();
+    startRealtime();
+    await refreshAdminState();
+  })();
+
+})();
+</script>
+</body>
+</html>
