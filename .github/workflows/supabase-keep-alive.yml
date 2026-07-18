@@ -1,0 +1,33 @@
+name: Supabase Keep-Alive
+
+# Prevents the Supabase free tier from auto-pausing after 7 days of no
+# database activity. Runs a genuine read query against the equipment
+# table (not just a ping to a static page) twice a week, which is well
+# inside the 7-day window Supabase checks against.
+
+on:
+  schedule:
+    - cron: '0 6 * * 1,4'   # 06:00 UTC every Monday and Thursday
+  workflow_dispatch:         # lets you trigger it manually from the Actions tab to test
+
+jobs:
+  ping-supabase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Query the equipment table to register real database activity
+        run: |
+          http_status=$(curl -s -o /tmp/response.json -w "%{http_code}" \
+            "${SUPABASE_URL}/rest/v1/equipment?select=id&limit=1" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}")
+
+          echo "Supabase responded with HTTP $http_status"
+          cat /tmp/response.json
+
+          if [ "$http_status" -ne 200 ]; then
+            echo "::error::Supabase keep-alive ping failed with HTTP $http_status. The project may be paused or the URL/key may be wrong - check manually."
+            exit 1
+          fi
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
