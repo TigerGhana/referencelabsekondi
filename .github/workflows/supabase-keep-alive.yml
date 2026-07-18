@@ -14,17 +14,40 @@ jobs:
   ping-supabase:
     runs-on: ubuntu-latest
     steps:
+      - name: Diagnose secret values (no secret content is ever printed)
+        run: |
+          echo "SUPABASE_URL length: ${#SUPABASE_URL} (expected: 40)"
+          if [[ "$SUPABASE_URL" == https://* ]]; then
+            echo "SUPABASE_URL starts with https://: yes"
+          else
+            echo "SUPABASE_URL starts with https://: no  <-- likely the problem"
+          fi
+          if [[ "$SUPABASE_URL" =~ [[:space:]] ]]; then
+            echo "SUPABASE_URL contains whitespace/newline: yes  <-- likely the problem"
+          else
+            echo "SUPABASE_URL contains whitespace/newline: no"
+          fi
+          echo "SUPABASE_ANON_KEY length: ${#SUPABASE_ANON_KEY} (expected: 46)"
+          if [[ "$SUPABASE_ANON_KEY" =~ [[:space:]] ]]; then
+            echo "SUPABASE_ANON_KEY contains whitespace/newline: yes  <-- likely the problem"
+          else
+            echo "SUPABASE_ANON_KEY contains whitespace/newline: no"
+          fi
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
       - name: Query the equipment table to register real database activity
         run: |
           http_status=$(curl -s -o /tmp/response.json -w "%{http_code}" \
             "${SUPABASE_URL}/rest/v1/equipment?select=id&limit=1" \
             -H "apikey: ${SUPABASE_ANON_KEY}" \
-            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}")
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}") || true
 
           echo "Supabase responded with HTTP $http_status"
-          cat /tmp/response.json
+          cat /tmp/response.json 2>/dev/null || true
 
-          if [ "$http_status" -ne 200 ]; then
+          if [ "$http_status" != "200" ]; then
             echo "::error::Supabase keep-alive ping failed with HTTP $http_status. The project may be paused or the URL/key may be wrong - check manually."
             exit 1
           fi
