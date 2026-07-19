@@ -39,8 +39,7 @@ jobs:
           set +e
           http_status=$(curl -s -o /tmp/response.json -w "%{http_code}" \
             "${SUPABASE_URL}/rest/v1/equipment?select=id&limit=1" \
-            -H "apikey: ${SUPABASE_ANON_KEY}" \
-            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}")
+            -H "apikey: ${SUPABASE_ANON_KEY}")
           curl_exit=$?
           set -e
 
