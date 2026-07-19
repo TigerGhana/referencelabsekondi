@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CEU Equipment Inventory — Public Health Reference Laboratory, Sekondi</title>
+<title>Public Health Reference Laboratory, Sekondi</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
 
@@ -218,11 +218,11 @@
 
 <header class="hero">
   <div class="hero-inner">
-    <div class="eyebrow"><span class="dot"></span> WESTERN REGIONAL HEALTH DIRECTORATE &nbsp;·&nbsp; CLINICAL ENGINEERING UNIT</div>
+    <div class="eyebrow"><span class="dot"></span> WESTERN REGION HEALTH DIRECTORATE &nbsp;·&nbsp; CLINICAL ENGINEERING UNIT</div>
     <div class="hero-title-row">
       <div>
         <h1>Public Health Reference Laboratory, Sekondi</h1>
-        <p class="sub">Live Equipment Inventory Dashboard.</p>
+        <p class="sub">Live Laboratory Equipment Status</p>
       </div>
       <div class="hero-right">
         <div class="admin-area" id="adminArea">
@@ -257,7 +257,7 @@
 
   <section class="section">
     <div class="section-head">
-      <h2>Fleet Overview</h2>
+      <h2>Equipment Overview</h2>
       <span class="hint" id="overviewHint"></span>
     </div>
     <div class="panel-grid">
@@ -331,8 +331,8 @@
   </section>
 
   <footer>
-    <span>2026 <span id="footCount">—</span> List include other assets</span>
-    <span>Managed by the Clinical Engineering Unit</span>
+    <span>Managed by the Clinical Engineering Unit · <span id="footCount">—</span>2026</span>
+    <span>Realtime sync enabled</span>
   </footer>
 </div>
 
@@ -382,7 +382,7 @@
   // this key. Never put a service_role key in client-side code.
   // =====================================================================
   var SUPABASE_URL = 'https://caewroxtotuimhpvlrzo.supabase.co';
-  var SUPABASE_KEY = 'sb_publishable_klguQyyP0EKMXRJyQCS9sg_J-tQ7XRg';
+  var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhZXdyb3h0b3R1aW1ocHZscnpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzMTkzMTcsImV4cCI6MjA5OTg5NTMxN30.ZG--XP0GY3q5YfibPQvtDx27_LdgOvt3dqC4A5NnNf4';
 
   var CONDITION_OPTIONS = ['FUNCTIONAL','NON-FUNCTIONAL','UNKNOWN'];
   var CAL_STATUS_OPTIONS = ['PASSED CALIBRATION','NOT CALIBRATED','OUT OF CALIBRATION','Not Applicable','Not Specified'];
