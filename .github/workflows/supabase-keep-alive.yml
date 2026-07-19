@@ -14,7 +14,7 @@ jobs:
   ping-supabase:
     runs-on: ubuntu-latest
     steps:
-      - name: Diagnose secret values (no secret content is ever printed)
+      - name: Diagnose secret values (no secret content is ever printed as-is)
         run: |
           echo "SUPABASE_URL length: ${#SUPABASE_URL} (expected: 40)"
           if [[ "$SUPABASE_URL" == https://* ]]; then
@@ -22,33 +22,34 @@ jobs:
           else
             echo "SUPABASE_URL starts with https://: no  <-- likely the problem"
           fi
-          if [[ "$SUPABASE_URL" =~ [[:space:]] ]]; then
-            echo "SUPABASE_URL contains whitespace/newline: yes  <-- likely the problem"
-          else
-            echo "SUPABASE_URL contains whitespace/newline: no"
-          fi
           echo "SUPABASE_ANON_KEY length: ${#SUPABASE_ANON_KEY} (expected: 46)"
-          if [[ "$SUPABASE_ANON_KEY" =~ [[:space:]] ]]; then
-            echo "SUPABASE_ANON_KEY contains whitespace/newline: yes  <-- likely the problem"
-          else
-            echo "SUPABASE_ANON_KEY contains whitespace/newline: no"
-          fi
+          echo ""
+          echo "----- Byte-level dump of SUPABASE_URL (catches invisible/smart-quote characters a normal check would miss) -----"
+          printf '%s' "$SUPABASE_URL" | od -c
+          echo ""
+          echo "----- First 10 and last 10 characters of SUPABASE_ANON_KEY only -----"
+          printf '%s' "$SUPABASE_ANON_KEY" | head -c 10 | od -c
+          printf '%s' "$SUPABASE_ANON_KEY" | tail -c 10 | od -c
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
       - name: Query the equipment table to register real database activity
         run: |
+          set +e
           http_status=$(curl -s -o /tmp/response.json -w "%{http_code}" \
             "${SUPABASE_URL}/rest/v1/equipment?select=id&limit=1" \
             -H "apikey: ${SUPABASE_ANON_KEY}" \
-            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}") || true
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}")
+          curl_exit=$?
+          set -e
 
-          echo "Supabase responded with HTTP $http_status"
+          echo "curl exit code: $curl_exit  (0=ok, 6=couldn't resolve host/DNS, 7=couldn't connect, 28=timeout, 35/60=SSL error)"
+          echo "HTTP status: $http_status"
           cat /tmp/response.json 2>/dev/null || true
 
-          if [ "$http_status" != "200" ]; then
-            echo "::error::Supabase keep-alive ping failed with HTTP $http_status. The project may be paused or the URL/key may be wrong - check manually."
+          if [ "$curl_exit" -ne 0 ] || [ "$http_status" != "200" ]; then
+            echo "::error::Supabase keep-alive ping failed - curl exit $curl_exit, HTTP $http_status."
             exit 1
           fi
         env:
