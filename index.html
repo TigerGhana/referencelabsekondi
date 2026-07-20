@@ -221,8 +221,8 @@
     <div class="eyebrow"><span class="dot"></span> WESTERN REGION HEALTH DIRECTORATE &nbsp;·&nbsp; CLINICAL ENGINEERING UNIT</div>
     <div class="hero-title-row">
       <div>
-        <h1>Public Health Reference Laboratory, Sekondi</h1>
-        <p class="sub">Live Laboratory Equipment Status</p>
+        <h1>Equipment Inventory Data</h1>
+        <p class="sub">Live Equipment status for the Public Health Reference Laboratory, Sekondi — synced in real time.</p>
       </div>
       <div class="hero-right">
         <div class="admin-area" id="adminArea">
@@ -237,7 +237,7 @@
     </div>
   </div>
   <div class="vitals" id="vitalsStrip">
-    <div class="vital"><div class="vital-label"><span class="led neutral"></span>Total Assets</div><div class="vital-value">—</div></div>
+    <div class="vital"><div class="vital-label"><span class="led neutral"></span>Total Equipment</div><div class="vital-value">—</div></div>
     <div class="vital"><div class="vital-label"><span class="led neutral"></span>Functional</div><div class="vital-value">—</div></div>
     <div class="vital"><div class="vital-label"><span class="led neutral"></span>Non-Functional</div><div class="vital-value">—</div></div>
     <div class="vital"><div class="vital-label"><span class="led neutral"></span>Calibration Overdue</div><div class="vital-value">—</div></div>
@@ -331,7 +331,7 @@
   </section>
 
   <footer>
-    <span>Managed by the Clinical Engineering Unit · 2026</span>
+    <span>Managed by Clinical Engineering Unit · 2026 </span>
     <span>Realtime sync enabled</span>
   </footer>
 </div>
@@ -409,6 +409,19 @@
   var isAdmin = false;
   var currentSession = null;
   var TODAY = new Date(); TODAY.setHours(0,0,0,0);
+
+  // Safety net: surface ANY uncaught error on the page into the visible
+  // error banner with its stack trace, not just ones inside loadEquipment's
+  // own try/catch. This is what lets a bug get diagnosed from a phone
+  // screenshot alone, without needing devtools access.
+  window.addEventListener('error', function(e){
+    console.error('Uncaught error:', e.message, e.error);
+    showError('Unexpected error: ' + describeError(e.error || {message: e.message}));
+  });
+  window.addEventListener('unhandledrejection', function(e){
+    console.error('Unhandled promise rejection:', e.reason);
+    showError('Unexpected error: ' + describeError(e.reason));
+  });
 
   function parseISO(s){
     if(!s || typeof s !== 'string') return null;
@@ -499,8 +512,12 @@
       return 'A browser extension or preview environment is interfering with network requests on this page (not a server or data issue). Try opening this file directly in a normal browser tab instead of an in-app preview.';
     }
     if(err.code === '42501') return 'You do not have permission to make this change. Your session may have expired - try signing in again.';
-    if(err.message) return err.message;
-    try{ return JSON.stringify(err); }catch(e){ return String(err); }
+    var base = err.message ? err.message : (function(){ try{ return JSON.stringify(err); }catch(e){ return String(err); } })();
+    if(err.stack){
+      var stackLines = String(err.stack).split('\n').slice(0, 3).join(' | ');
+      return base + '  [DEBUG: ' + stackLines + ']';
+    }
+    return base;
   }
   function showInfo(msg){
     var b = document.getElementById('infoBanner');
@@ -740,10 +757,16 @@
 
   function findById(id){ for(var i=0;i<DATA.length;i++){ if(DATA[i].id === id) return DATA[i]; } return null; }
 
+  function delay(ms){ return new Promise(function(resolve){ setTimeout(resolve, ms); }); }
+
   // ---------- Data loading ----------
   // Auto-retries transient failures (weak connection, Supabase free-tier
   // project waking up from an idle pause) before asking the user to retry
   // manually, so a momentary blip doesn't strand the page on first load.
+  // The returned promise only resolves once loading has either succeeded
+  // or exhausted all retries - callers that await this are guaranteed the
+  // full attempt (including retries) has actually finished, not just that
+  // a background retry was merely scheduled.
   async function loadEquipment(attempt){
     attempt = attempt || 1;
     var MAX_AUTO_RETRIES = 3;
@@ -756,7 +779,8 @@
     }catch(err){
       console.error('loadEquipment failed (attempt ' + attempt + ')', describeError(err), err);
       if(attempt < MAX_AUTO_RETRIES){
-        setTimeout(function(){ loadEquipment(attempt + 1); }, attempt * 1200);
+        await delay(attempt * 1200);
+        await loadEquipment(attempt + 1);
         return;
       }
       showError('Could not load equipment data from the server. ' + describeError(err), function(){ loadEquipment(1); });
