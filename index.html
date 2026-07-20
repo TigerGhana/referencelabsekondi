@@ -187,7 +187,7 @@
   .login-modal .form-field{ margin-bottom:12px; }
   .login-modal .form-field input{ width:100%; }
 
-  footer{ margin-top:44px; padding-top:18px; border-top:1px solid var(--line); font-size:12px; color:var(--muted-2); font-family:var(--font-mono); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+  .page-footer{ margin-top:44px; padding-top:18px; border-top:1px solid var(--line); font-size:12px; color:var(--muted-2); font-family:var(--font-mono); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
 
   @media (max-width: 980px){
     .panel-grid{ grid-template-columns:1fr 1fr; }
@@ -257,7 +257,7 @@
 
   <section class="section">
     <div class="section-head">
-      <h2>Equipment Overview</h2>
+      <h2>Fleet Overview</h2>
       <span class="hint" id="overviewHint"></span>
     </div>
     <div class="panel-grid">
@@ -330,10 +330,10 @@
     </div>
   </section>
 
-  <footer>
-    <span>Managed by Clinical Engineering Unit · 2026 </span>
-    <span>Realtime sync enabled</span>
-  </footer>
+  <div class="page-footer">
+    <span>Managed by Clinical Ebgineering Unit · <span id="footCount">—</span> Equipment on record</span>
+    <span>2026 · Realtime sync enabled</span>
+  </div>
 </div>
 
 <!-- Detail / Edit modal -->
@@ -404,6 +404,15 @@
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   }
   function dash(v){ return (v === null || v === undefined || v === '') ? '—' : v; }
+  // Some mobile data-saver proxies, ad blockers, and privacy extensions strip
+  // semantic elements (like <footer>) from the page entirely. Any single
+  // piece of decorative UI text going missing should never be allowed to
+  // crash the whole render pipeline - so every textContent write goes
+  // through this guard instead of touching getElementById results directly.
+  function setText(id, value){
+    var el = document.getElementById(id);
+    if(el) el.textContent = value;
+  }
 
   var DATA = [];
   var isAdmin = false;
@@ -491,7 +500,7 @@
   // ---------- Banners ----------
   function showError(msg, retryFn){
     var b = document.getElementById('errorBanner');
-    document.getElementById('errorBannerText').textContent = msg;
+    setText('errorBannerText', msg);
     var retryBtn = document.getElementById('errorBannerRetry');
     if(typeof retryFn === 'function'){
       retryBtn.style.display = 'inline-block';
@@ -521,7 +530,7 @@
   }
   function showInfo(msg){
     var b = document.getElementById('infoBanner');
-    document.getElementById('infoBannerText').textContent = msg;
+    setText('infoBannerText', msg);
     b.classList.add('show');
     clearTimeout(showInfo._t);
     showInfo._t = setTimeout(hideInfo, 4000);
@@ -543,8 +552,8 @@
   // ---------- Clock ----------
   function tickClock(){
     var now = new Date();
-    document.getElementById('clockTime').textContent = now.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
-    document.getElementById('clockDate').textContent = now.toLocaleDateString('en-GB', {weekday:'long', day:'2-digit', month:'long', year:'numeric'});
+    setText('clockTime', now.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'}));
+    setText('clockDate', now.toLocaleDateString('en-GB', {weekday:'long', day:'2-digit', month:'long', year:'numeric'}));
   }
   tickClock();
   setInterval(tickClock, 30000);
@@ -574,8 +583,8 @@
       return '<div class="vital"><div class="vital-label"><span class="led '+it.led+'"></span>'+esc(it.label)+'</div>'+
         '<div class="vital-value">'+it.value+(it.suffix?'<small>'+esc(it.suffix)+'</small>':'')+'</div></div>';
     }).join('');
-    document.getElementById('footCount').textContent = total;
-    document.getElementById('overviewHint').textContent = total + ' assets across ' + Object.keys(countBy('location')).length + ' locations';
+    setText('footCount', total);
+    setText('overviewHint', total + ' assets across ' + Object.keys(countBy('location')).length + ' locations');
   }
 
   function renderDonut(){
@@ -622,7 +631,7 @@
   var attentionCollapsed = false;
   function renderAttention(){
     var list = DATA.filter(needsAttention);
-    document.getElementById('attnCount').textContent = list.length;
+    setText('attnCount', list.length);
     var body = document.getElementById('attentionBody');
     if(list.length === 0){
       body.innerHTML = '<div class="no-results">No flagged equipment — fleet is in good standing.</div>';
@@ -695,7 +704,7 @@
   function renderTable(){
     var filtered = getFiltered();
     var sorted = sortRows(filtered);
-    document.getElementById('resultCount').textContent = 'Showing ' + sorted.length + ' of ' + DATA.length + ' assets';
+    setText('resultCount', 'Showing ' + sorted.length + ' of ' + DATA.length + ' assets');
     var tbody = document.getElementById('tableBody');
     if(sorted.length === 0){
       tbody.innerHTML = '<tr><td colspan="9"><div class="no-results">No equipment matches these filters.</div></td></tr>';
